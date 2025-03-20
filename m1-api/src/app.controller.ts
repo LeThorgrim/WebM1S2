@@ -1,9 +1,14 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { AppService } from './app.service';
 
-@Controller('')
+@Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
+
+  @Get()
+  public async root(): Promise<string> {
+    return "Hello from NestJS!";
+  }
 
   @Get('greet/:name')
   public async greetMe(@Param('name') name: string): Promise<string> {
