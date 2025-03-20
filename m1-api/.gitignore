@@ -1,6 +1,8 @@
-# compiled output
+# Compiled output
 /dist
 /node_modules
+/.pnp
+.pnp.js
 
 # Logs
 logs
@@ -13,10 +15,30 @@ lerna-debug.log*
 
 # OS
 .DS_Store
+Thumbs.db
 
 # Tests
 /coverage
 /.nyc_output
+
+# Production and build files
+/build
+/.next
+/out
+
+# SQLite database files
+*.sqlite
+*.sqlite-journal
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
 
 # IDEs and editors
 /.idea
@@ -27,7 +49,7 @@ lerna-debug.log*
 .settings/
 *.sublime-workspace
 
-# IDE - VSCode
+# VSCode IDE
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

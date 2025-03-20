@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 {
   "/page": "app/page.js",
   "/books/page": "app/books/page.js",
   "/authors/page": "app/authors/page.js"
 }
+=======
+{}
+>>>>>>> 93db58fa640342a552d7b26e1eb03d8c43880af7
