@@ -7,7 +7,7 @@ export class AppController {
 
   @Get()
   public async root(): Promise<string> {
-    return "Hello from NestJS!";
+    return 'Hello from NestJS!';
   }
 
   @Get('greet/:name')

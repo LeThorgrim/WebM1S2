@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-// File: C:\Users\Augustin\Desktop\M1\Techno web\WebM1S2\m1-site\src\app\layout.tsx
-=======
-// File: C:\Users\Thorgrim\Documents\GitHub\WebM1S2\m1-site\src\app\layout.tsx
->>>>>>> 93db58fa640342a552d7b26e1eb03d8c43880af7
+// File: C:\Users\Augustin\Desktop\M1\TechnoWeb\WebM1S2\m1-site\src\app\layout.tsx
 import * as entry from '../../../src/app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
