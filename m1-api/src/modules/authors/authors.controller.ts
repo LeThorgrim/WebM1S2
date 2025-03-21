@@ -1,7 +1,16 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+} from '@nestjs/common';
 import { AuthorService } from './authors.service';
 import { AuthorModel } from './authors.model';
-import { CreateAuthorDto } from './authors.dto';
+import { CreateAuthorDto, UpdateAuthorDto } from './authors.dto';
+import { AuthorId } from '../database/entities/author.entity';
 
 @Controller('authors')
 export class AuthorController {
@@ -17,5 +26,18 @@ export class AuthorController {
     @Body() input: CreateAuthorDto,
   ): Promise<AuthorModel> {
     return this.authorService.createAuthor(input);
+  }
+
+  @Put(':id')
+  public async updateAuthor(
+    @Param('id') id: AuthorId,
+    @Body() input: UpdateAuthorDto,
+  ): Promise<AuthorModel> {
+    return this.authorService.updateAuthor(id, input);
+  }
+
+  @Delete(':id')
+  public async deleteAuthor(@Param('id') id: AuthorId): Promise<void> {
+    return this.authorService.deleteAuthor(id);
   }
 }
