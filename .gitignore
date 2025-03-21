@@ -1,0 +1,3 @@
+# Ignore les fichiers d'archives qui encombrent les depots
+*.gz
+*.gz.old
