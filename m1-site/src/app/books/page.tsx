@@ -1,91 +1,186 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import BookList from "../../components/BookList";
-import { Modal } from "../../components/Modal";
-import { Book } from "../../models/Book";
+import React, { useState, useEffect } from 'react';
+import BookList from '../../components/BookList';
+import { Modal } from '../../components/Modal';
+import { Book } from '../../models/Book';
 
-export default function BooksPage() {
-  // Données temporaires (à remplacer par un fetch API plus tard)
+const BooksPage: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [formData, setFormData] = useState({ title: '', year: 0, authorId: 0 });
 
   useEffect(() => {
-    async function fetchBooks() {
-      try {
-        const response = await fetch("http://localhost:3001/books");
-        if (!response.ok) {
-          throw new Error("Failed to fetch books");
-        }
-        const data: Book[] = await response.json();
-        setBooks(data);
-      } catch (error) {
-        console.error("Error fetching books:", error);
-      }
-    }
-
     fetchBooks();
   }, []);
 
-  const [search, setSearch] = useState("");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const fetchBooks = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/books');
+      if (!response.ok) throw new Error('Erreur lors du chargement des livres');
+      const data: Book[] = await response.json();
+      setBooks(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-  // Filtrer les livres par titre
-  const filteredBooks = books.filter((book) =>
-    book.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleCreate = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/books', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) throw new Error('Erreur lors de la création');
+      const newBook: Book = await response.json();
+      setBooks([...books, newBook]);
+      setIsCreateModalOpen(false);
+      setFormData({ title: '', year: 0, authorId: 0 });
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-  // Trier les livres par titre
-  const sortedBooks = [...filteredBooks].sort((a, b) => {
-    const comparison = a.title.localeCompare(b.title);
-    return sortOrder === "asc" ? comparison : -comparison;
-  });
+  const handleEdit = async () => {
+    if (!selectedBook) return;
+    try {
+      const response = await fetch(`http://localhost:3001/books/${selectedBook.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) throw new Error('Erreur lors de la modification');
+      const updatedBook: Book = await response.json();
+      setBooks(books.map((book) => (book.id === updatedBook.id ? updatedBook : book)));
+      setIsEditModalOpen(false);
+      setSelectedBook(null);
+      setFormData({ title: '', year: 0, authorId: 0 });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedBook) return;
+    try {
+      const response = await fetch(`http://localhost:3001/books/${selectedBook.id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Erreur lors de la suppression');
+      setBooks(books.filter((book) => book.id !== selectedBook.id));
+      setIsDeleteModalOpen(false);
+      setSelectedBook(null);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const openCreateModal = () => {
+    setFormData({ title: '', year: 0, authorId: 0 });
+    setIsCreateModalOpen(true);
+  };
+
+  const openEditModal = (book: Book) => {
+    setSelectedBook(book);
+    setFormData({ title: book.title, year: book.year, authorId: book.authorId });
+    setIsEditModalOpen(true);
+  };
+
+  const openDeleteModal = (book: Book) => {
+    setSelectedBook(book);
+    setIsDeleteModalOpen(true);
+  };
 
   return (
-    <div>
-      <h1 className="text-2xl mb-4">Library</h1>
-      <div className="mb-4 flex space-x-4">
-        <input
-          type="text"
-          placeholder="Search books..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="p-2 border rounded"
-        />
-        <button
-          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-          className="p-2 bg-gray-500 text-white rounded"
-        >
-          Sort {sortOrder === "asc" ? "Descending" : "Ascending"}
-        </button>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="p-2 bg-blue-500 text-white rounded"
-        >
-          Add Book
-        </button>
-      </div>
-      <BookList books={sortedBooks} />
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add a New Book">
-        <h2 className="text-xl mb-4">Add a New Book</h2>
-        <form>
-          <div className="mb-2">
-            <label>Title:</label>
-            <input type="text" className="p-2 border rounded w-full" />
-          </div>
-          <div className="mb-2">
-            <label>Year:</label>
-            <input type="number" className="p-2 border rounded w-full" />
-          </div>
-          <div className="mb-2">
-            <label>Author:</label>
-            <input type="text" className="p-2 border rounded w-full" />
-          </div>
-          <button type="submit" className="p-2 bg-green-500 text-white rounded">
-            Submit
-          </button>
-        </form>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Liste des livres</h1>
+      <button
+        onClick={openCreateModal}
+        className="mb-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+      >
+        Ajouter un livre
+      </button>
+      <BookList books={books} onEdit={openEditModal} onDelete={openDeleteModal} />
+
+      {/* Modal pour créer un livre */}
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onConfirm={handleCreate}
+        title="Ajouter un livre"
+      >
+        <div className="space-y-4">
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            className="w-full p-2 border rounded"
+            placeholder="Titre"
+          />
+          <input
+            type="number"
+            value={formData.year}
+            onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+            className="w-full p-2 border rounded"
+            placeholder="Année"
+          />
+          <input
+            type="number"
+            value={formData.authorId}
+            onChange={(e) => setFormData({ ...formData, authorId: parseInt(e.target.value) })}
+            className="w-full p-2 border rounded"
+            placeholder="ID de l'auteur"
+          />
+        </div>
+      </Modal>
+
+      {/* Modal pour modifier un livre */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onConfirm={handleEdit}
+        title="Modifier le livre"
+      >
+        <div className="space-y-4">
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            className="w-full p-2 border rounded"
+            placeholder="Titre"
+          />
+          <input
+            type="number"
+            value={formData.year}
+            onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+            className="w-full p-2 border rounded"
+            placeholder="Année"
+          />
+          <input
+            type="number"
+            value={formData.authorId}
+            onChange={(e) => setFormData({ ...formData, authorId: parseInt(e.target.value) })}
+            className="w-full p-2 border rounded"
+            placeholder="ID de l'auteur"
+          />
+        </div>
+      </Modal>
+
+      {/* Modal pour supprimer un livre */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        title="Confirmer la suppression"
+      >
+        <p>Êtes-vous sûr de vouloir supprimer "{selectedBook?.title}" ?</p>
       </Modal>
     </div>
   );
-}
+};
+
+export default BooksPage;
