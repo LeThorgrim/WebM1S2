@@ -18,8 +18,15 @@ export class BooksService {
     return this.booksRepository.findOneBy({ id });
   }
 
-  create(book: Book): Promise<Book> {
-    return this.booksRepository.save(book);
+  create(book: Partial<Book>): Promise<Book> {
+    const newBook = this.booksRepository.create(book); 
+    return this.booksRepository.save(newBook); 
+  }
+  
+
+  async update(id: number, updated: Book): Promise<Book> {
+    await this.booksRepository.update(id, updated);
+    return this.booksRepository.findOneBy({ id });
   }
 
   async delete(id: number): Promise<void> {

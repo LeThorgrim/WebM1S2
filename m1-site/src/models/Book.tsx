@@ -1,12 +1,13 @@
+import { AuthorEntity } from './Author';
 
 export type Book = {
-    id: number;
-    title: string;
-    year: number;
-    author: string;
-    price?: number; // Optionnel pour l'instant
-    ratings?: Rating[]; // Ajouté pour les évaluations (à définir plus tard)
-  }
+  id: number;
+  title: string;
+  year: number;
+  authorId: number; 
+  author?: AuthorEntity;  // Optionnel, afficher les infos de l'auteur
+};
+
   
   export type Rating = {
     id: number;
