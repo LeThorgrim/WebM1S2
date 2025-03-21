@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import BookList from "../../components/BookList";
-import Modal from "../../components/Modal";
+import { Modal } from "../../components/Modal";
 import { Book } from "../../models/Book";
 
 export default function BooksPage() {
