@@ -1,16 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BookList from "../../components/BookList";
 import { Modal } from "../../components/Modal";
 import { Book } from "../../models/Book";
 
 export default function BooksPage() {
   // Données temporaires (à remplacer par un fetch API plus tard)
-  const [books, setBooks] = useState<Book[]>([
-    { id: 1, title: "Book 1", year: 2020, author: "Author 1" },
-    { id: 2, title: "Book 2", year: 2019, author: "Author 2" },
-  ]);
+  const [books, setBooks] = useState<Book[]>([]);
+
+  useEffect(() => {
+    async function fetchBooks() {
+      try {
+        const response = await fetch("http://localhost:3001/books");
+        if (!response.ok) {
+          throw new Error("Failed to fetch books");
+        }
+        const data: Book[] = await response.json();
+        setBooks(data);
+      } catch (error) {
+        console.error("Error fetching books:", error);
+      }
+    }
+
+    fetchBooks();
+  }, []);
+
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -51,7 +66,7 @@ export default function BooksPage() {
         </button>
       </div>
       <BookList books={sortedBooks} />
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add a New Book">
         <h2 className="text-xl mb-4">Add a New Book</h2>
         <form>
           <div className="mb-2">
