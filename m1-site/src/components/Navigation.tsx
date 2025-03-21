@@ -1,28 +1,17 @@
+import Link from 'next/link';
 
-import Link from "next/link";
-
-const Navigation: React.FC = () => {
-  return (
-    <nav className="bg-gray-800 p-4">
-      <ul className="flex space-x-4 text-white">
-        <li>
-          <Link href="/" className="hover:underline">
-            Home
-          </Link>
-        </li>
-        <li>
-          <Link href="/books" className="hover:underline">
-            Books
-          </Link>
-        </li>
-        <li>
-          <Link href="/authors" className="hover:underline">
-            Authors
-          </Link>
-        </li>
-      </ul>
-    </nav>
-  );
-};
-
-export default Navigation;
+export const Navigation: React.FC = () => (
+  <nav className="bg-gray-800 text-white p-4">
+    <ul className="flex space-x-4">
+      <li>
+        <Link href="/">Accueil</Link>
+      </li>
+      <li>
+        <Link href="/books">Livres</Link>
+      </li>
+      <li>
+        <Link href="/authors">Auteurs</Link>
+      </li>
+    </ul>
+  </nav>
+);

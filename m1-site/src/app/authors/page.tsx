@@ -1,82 +1,183 @@
-// app/authors/page.tsx
-"use client"; // Nécessaire car nous utilisons useState
+'use client';
 
-import { useState } from "react";
-import AuthorList from "../../components/AuthorList";
-import Modal from "../../components/Modal";
-import { Author } from "../../models/Author";
-export default function AuthorsPage() {
-  // Données temporaires (à remplacer par un fetch API plus tard)
-  const [authors, setAuthors] = useState<Author[]>([
-    {
-      id: 1,
-      name: "Author 1",
-      photo: "https://via.placeholder.com/150", // Image placeholder
-      books: [{ id: 1, title: "Book 1", year: 2020, author: "Author 1" }],
-    },
-    {
-      id: 2,
-      name: "Author 2",
-      photo: "https://via.placeholder.com/150", // Image placeholder
-      books: [{ id: 2, title: "Book 2", year: 2019, author: "Author 2" }],
-    },
-  ]);
-  const [search, setSearch] = useState("");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+import React, { useState, useEffect } from 'react';
+import { AuthorList } from '../../components/AuthorList';
+import { Modal } from '../../components/Modal';
+import { Author } from '../../models/Author';
 
-  // Filtrer les auteurs par nom
-  const filteredAuthors = authors.filter((author) =>
-    author.name.toLowerCase().includes(search.toLowerCase())
-  );
+const AuthorsPage: React.FC = () => {
+  const [authors, setAuthors] = useState<Author[]>([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
+  const [formData, setFormData] = useState({ firstName: '', lastName: '' });
 
-  // Trier les auteurs par nom
-  const sortedAuthors = [...filteredAuthors].sort((a, b) => {
-    const comparison = a.name.localeCompare(b.name);
-    return sortOrder === "asc" ? comparison : -comparison;
-  });
+  // Charger les auteurs depuis l'API
+  useEffect(() => {
+    fetchAuthors();
+  }, []);
+
+  const fetchAuthors = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/authors');
+      if (!response.ok) throw new Error('Erreur lors du chargement des auteurs');
+      const data: Author[] = await response.json();
+      setAuthors(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Créer un auteur
+  const handleCreate = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/authors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) throw new Error('Erreur lors de la création');
+      const newAuthor: Author = await response.json();
+      setAuthors([...authors, newAuthor]);
+      setIsCreateModalOpen(false);
+      setFormData({ firstName: '', lastName: '' });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Modifier un auteur
+  const handleEdit = async () => {
+    if (!selectedAuthor) return;
+    try {
+      const response = await fetch(`http://localhost:3001/authors/${selectedAuthor.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) throw new Error('Erreur lors de la modification');
+      const updatedAuthor: Author = await response.json();
+      setAuthors(
+        authors.map((author) =>
+          author.id === updatedAuthor.id ? updatedAuthor : author,
+        ),
+      );
+      setIsEditModalOpen(false);
+      setSelectedAuthor(null);
+      setFormData({ firstName: '', lastName: '' });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Supprimer un auteur
+  const handleDelete = async () => {
+    if (!selectedAuthor) return;
+    try {
+      const response = await fetch(`http://localhost:3001/authors/${selectedAuthor.id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Erreur lors de la suppression');
+      setAuthors(authors.filter((author) => author.id !== selectedAuthor.id));
+      setIsDeleteModalOpen(false);
+      setSelectedAuthor(null);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const openCreateModal = () => {
+    setFormData({ firstName: '', lastName: '' });
+    setIsCreateModalOpen(true);
+  };
+
+  const openEditModal = (author: Author) => {
+    setSelectedAuthor(author);
+    setFormData({ firstName: author.firstName, lastName: author.lastName });
+    setIsEditModalOpen(true);
+  };
+
+  const openDeleteModal = (author: Author) => {
+    setSelectedAuthor(author);
+    setIsDeleteModalOpen(true);
+  };
 
   return (
-    <div>
-      <h1 className="text-2xl mb-4">Authors</h1>
-      <div className="mb-4 flex space-x-4">
-        <input
-          type="text"
-          placeholder="Search authors..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="p-2 border rounded"
-        />
-        <button
-          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-          className="p-2 bg-gray-500 text-white rounded"
-        >
-          Sort {sortOrder === "asc" ? "Descending" : "Ascending"}
-        </button>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="p-2 bg-blue-500 text-white rounded"
-        >
-          Add Author
-        </button>
-      </div>
-      <AuthorList authors={sortedAuthors} />
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <h2 className="text-xl mb-4">Add a New Author</h2>
-        <form>
-          <div className="mb-2">
-            <label>Name:</label>
-            <input type="text" className="p-2 border rounded w-full" />
-          </div>
-          <div className="mb-2">
-            <label>Photo URL:</label>
-            <input type="text" className="p-2 border rounded w-full" />
-          </div>
-          <button type="submit" className="p-2 bg-green-500 text-white rounded">
-            Submit
-          </button>
-        </form>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Liste des auteurs</h1>
+      <button
+        onClick={openCreateModal}
+        className="mb-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+      >
+        Ajouter un auteur
+      </button>
+      <AuthorList authors={authors} onEdit={openEditModal} onDelete={openDeleteModal} />
+
+      {/* Modal pour créer un auteur */}
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onConfirm={handleCreate}
+        title="Ajouter un auteur"
+      >
+        <div className="space-y-4">
+          <input
+            type="text"
+            value={formData.firstName}
+            onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+            className="w-full p-2 border rounded"
+            placeholder="Prénom"
+          />
+          <input
+            type="text"
+            value={formData.lastName}
+            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+            className="w-full p-2 border rounded"
+            placeholder="Nom"
+          />
+        </div>
+      </Modal>
+
+      {/* Modal pour modifier un auteur */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onConfirm={handleEdit}
+        title="Modifier l'auteur"
+      >
+        <div className="space-y-4">
+          <input
+            type="text"
+            value={formData.firstName}
+            onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+            className="w-full p-2 border rounded"
+            placeholder="Prénom"
+          />
+          <input
+            type="text"
+            value={formData.lastName}
+            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+            className="w-full p-2 border rounded"
+            placeholder="Nom"
+          />
+        </div>
+      </Modal>
+
+      {/* Modal pour supprimer un auteur */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        title="Confirmer la suppression"
+      >
+        <p>
+          Êtes-vous sûr de vouloir supprimer {selectedAuthor?.firstName}{' '}
+          {selectedAuthor?.lastName} ?
+        </p>
       </Modal>
     </div>
   );
-}
+};
+
+export default AuthorsPage;
