@@ -7,7 +7,8 @@ import { AuthorEntity as Author } from '../../models/Author';
 
 const AuthorsPage: React.FC = () => {
   const [authors, setAuthors] = useState<Author[]>([]);
-  const [searchTerm, setSearchTerm] = useState(''); // 🔍 Barre de recherche
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null); // Tri
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -30,7 +31,6 @@ const AuthorsPage: React.FC = () => {
     }
   };
 
-  // Créer un auteur
   const handleCreate = async () => {
     try {
       const response = await fetch('http://localhost:3001/authors', {
@@ -109,6 +109,15 @@ const AuthorsPage: React.FC = () => {
       .includes(searchTerm.toLowerCase())
   );
 
+  // 🔡 Tri alphabétique
+  const sortedAuthors = [...filteredAuthors].sort((a, b) => {
+    const nameA = `${a.lastName} ${a.firstName}`.toLowerCase();
+    const nameB = `${b.lastName} ${b.firstName}`.toLowerCase();
+    if (sortOrder === 'asc') return nameA.localeCompare(nameB);
+    if (sortOrder === 'desc') return nameB.localeCompare(nameA);
+    return 0;
+  });
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Liste des auteurs</h1>
@@ -122,6 +131,22 @@ const AuthorsPage: React.FC = () => {
         className="mb-4 px-4 py-2 border border-gray-300 rounded w-full"
       />
 
+      {/* 🔡 Boutons de tri */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setSortOrder('asc')}
+          className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Trier A → Z
+        </button>
+        <button
+          onClick={() => setSortOrder('desc')}
+          className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Trier Z → A
+        </button>
+      </div>
+
       <button
         onClick={openCreateModal}
         className="mb-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
@@ -129,7 +154,7 @@ const AuthorsPage: React.FC = () => {
         Ajouter un auteur
       </button>
 
-      <AuthorList authors={filteredAuthors} onEdit={openEditModal} onDelete={openDeleteModal} />
+      <AuthorList authors={sortedAuthors} onEdit={openEditModal} onDelete={openDeleteModal} />
 
       {/* Modal pour créer un auteur */}
       <Modal
