@@ -21,6 +21,11 @@ export class AuthorController {
     return this.authorService.getAuthors();
   }
 
+  @Get(':id')
+  public async getAuthorById(@Param('id') id: AuthorId): Promise<AuthorModel> {
+    return this.authorService.getAuthorById(id);
+  }
+
   @Post()
   public async createAuthor(
     @Body() input: CreateAuthorDto,

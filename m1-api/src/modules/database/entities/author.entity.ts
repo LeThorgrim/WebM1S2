@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, OneToMany} from 'typeorm';
+import { Book } from './book.entity';
 
 export type AuthorId = string & { __brand: 'Author' };
 
@@ -12,4 +13,7 @@ export class AuthorEntity {
 
   @Column({ name: 'last_name', type: 'varchar' })
   lastName: string;
+
+  @OneToMany(() => Book, book => book.author)
+  books: Book[];
 }
