@@ -7,6 +7,7 @@ import { AuthorEntity as Author } from '../../models/Author';
 
 const AuthorsPage: React.FC = () => {
   const [authors, setAuthors] = useState<Author[]>([]);
+  const [searchTerm, setSearchTerm] = useState(''); // 🔍 Barre de recherche
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -58,11 +59,9 @@ const AuthorsPage: React.FC = () => {
       });
       if (!response.ok) throw new Error('Erreur lors de la modification');
       const updatedAuthor: Author = await response.json();
-      setAuthors(
-        authors.map((author) =>
-          author.id === updatedAuthor.id ? updatedAuthor : author,
-        ),
-      );
+      setAuthors(authors.map((author) =>
+        author.id === updatedAuthor.id ? updatedAuthor : author,
+      ));
       setIsEditModalOpen(false);
       setSelectedAuthor(null);
       setFormData({ firstName: '', lastName: '' });
@@ -103,16 +102,34 @@ const AuthorsPage: React.FC = () => {
     setIsDeleteModalOpen(true);
   };
 
+  // 🔍 Recherche locale
+  const filteredAuthors = authors.filter(author =>
+    `${author.firstName} ${author.lastName}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Liste des auteurs</h1>
+
+      {/* 🔍 Barre de recherche */}
+      <input
+        type="text"
+        placeholder="Rechercher un auteur..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="mb-4 px-4 py-2 border border-gray-300 rounded w-full"
+      />
+
       <button
         onClick={openCreateModal}
         className="mb-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
       >
         Ajouter un auteur
       </button>
-      <AuthorList authors={authors} onEdit={openEditModal} onDelete={openDeleteModal} />
+
+      <AuthorList authors={filteredAuthors} onEdit={openEditModal} onDelete={openDeleteModal} />
 
       {/* Modal pour créer un auteur */}
       <Modal
