@@ -31,3 +31,4 @@ cd m1-site
 npm install
 npm run dev
 ```
+Alors, le site web sera accessible à : http://localhost:3000/
