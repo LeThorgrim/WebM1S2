@@ -6,9 +6,10 @@ type AuthorListProps = {
   authors: AuthorEntity[];
   onEdit: (author: AuthorEntity) => void;
   onDelete: (author: AuthorEntity) => void;
+  onShowBooks?: (author: AuthorEntity) => void; // Optionnel, pour compatibilité
 };
 
-export const AuthorList: React.FC<AuthorListProps> = ({ authors, onEdit, onDelete }) => {
+export const AuthorList: React.FC<AuthorListProps> = ({ authors, onEdit, onDelete, onShowBooks }) => {
   return (
     <ul className="space-y-4">
       {authors.map((author) => (

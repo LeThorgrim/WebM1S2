@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Book } from '../database/entities/book.entity';
+import { AuthorId } from '../database/entities/author.entity';
 
 @Injectable()
 export class BooksService {
@@ -12,6 +13,10 @@ export class BooksService {
 
   findAll(): Promise<Book[]> {
     return this.booksRepository.find();
+  }
+
+  findByAuthorId(authorId: AuthorId): Promise<Book[]> {
+    return this.booksRepository.find({ where: { authorId } });
   }
 
   findOne(id: number): Promise<Book | null> {

@@ -10,6 +10,7 @@ import {
   } from '@nestjs/common';
   import { BooksService } from './books.service';
   import { Book } from '../database/entities/book.entity';
+  import { AuthorId } from '../database/entities/author.entity';
   
   @Controller('books')
   export class BooksController {
@@ -18,6 +19,11 @@ import {
     @Get()
     findAll(): Promise<Book[]> {
       return this.booksService.findAll();
+    }
+
+    @Get('by-author/:authorId')
+    findByAuthorId(@Param('authorId') authorId: AuthorId): Promise<Book[]> {
+      return this.booksService.findByAuthorId(authorId);
     }
   
     @Get(':id')
