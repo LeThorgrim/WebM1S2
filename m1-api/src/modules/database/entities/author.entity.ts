@@ -14,6 +14,6 @@ export class AuthorEntity {
   @Column({ name: 'last_name', type: 'varchar' })
   lastName: string;
 
-  @OneToMany(() => Book, book => book.author)
-  books: Book[];
+  @OneToMany(() => Book, book => book.author, { cascade: true})
+  books?: Book[];
 }

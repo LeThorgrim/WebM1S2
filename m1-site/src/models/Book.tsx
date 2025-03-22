@@ -4,7 +4,7 @@ export type Book = {
   id: number;
   title: string;
   year: number;
-  authorId: number; 
+  authorId: string; 
   author?: AuthorEntity;  // Optionnel, afficher les infos de l'auteur
 };
 

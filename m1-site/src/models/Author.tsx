@@ -1,7 +1,7 @@
 import { Book } from './Book';
 
 export type AuthorEntity = {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
 };
