@@ -13,7 +13,11 @@ const BookList: React.FC<BookListProps> = ({ books, onEdit, onDelete }) => {
         <li key={book.id} className="p-4 border rounded shadow">
           <h2 className="text-lg font-bold">{book.title}</h2>
           <p>Année : {book.year}</p>
-          <p>Auteur : {book.author ? book.author.toString() : "Inconnu"}</p>
+          <p>
+          Auteur : {book.author
+            ? `${book.author.firstName} ${book.author.lastName}`
+            : 'Inconnu'}
+          </p>
           <div className="mt-2 space-x-2">
             {onEdit && (
               <button

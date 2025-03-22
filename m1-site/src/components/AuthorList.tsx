@@ -1,11 +1,11 @@
 import React from 'react';
-import { Author } from '../models/Author';
+import { AuthorEntity } from '../models/Author';
 import Link from 'next/link';
 
 type AuthorListProps = {
-  authors: Author[];
-  onEdit: (author: Author) => void;
-  onDelete: (author: Author) => void;
+  authors: AuthorEntity[];
+  onEdit: (author: AuthorEntity) => void;
+  onDelete: (author: AuthorEntity) => void;
 };
 
 export const AuthorList: React.FC<AuthorListProps> = ({ authors, onEdit, onDelete }) => {
