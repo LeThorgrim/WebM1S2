@@ -102,14 +102,14 @@ const AuthorsPage: React.FC = () => {
     setIsDeleteModalOpen(true);
   };
 
-  // 🔍 Recherche locale
+  // Recherche locale
   const filteredAuthors = authors.filter(author =>
     `${author.firstName} ${author.lastName}`
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
   );
 
-  // 🔡 Tri alphabétique
+  // Tri alphabétique
   const sortedAuthors = [...filteredAuthors].sort((a, b) => {
     const nameA = `${a.lastName} ${a.firstName}`.toLowerCase();
     const nameB = `${b.lastName} ${b.firstName}`.toLowerCase();
@@ -122,7 +122,7 @@ const AuthorsPage: React.FC = () => {
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Liste des auteurs</h1>
 
-      {/* 🔍 Barre de recherche */}
+      {/* Barre de recherche */}
       <input
         type="text"
         placeholder="Rechercher un auteur..."
@@ -131,7 +131,7 @@ const AuthorsPage: React.FC = () => {
         className="mb-4 px-4 py-2 border border-gray-300 rounded w-full"
       />
 
-      {/* 🔡 Boutons de tri */}
+      {/* Boutons de tri */}
       <div className="flex gap-2 mb-4">
         <button
           onClick={() => setSortOrder('asc')}

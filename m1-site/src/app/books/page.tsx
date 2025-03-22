@@ -9,7 +9,9 @@ import { AuthorEntity } from '../../models/Author';
 const BooksPage: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [authors, setAuthors] = useState<AuthorEntity[]>([]);
-  const [searchTerm, setSearchTerm] = useState(''); // searchbar
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOption, setSortOption] = useState<'title-asc' | 'title-desc' | 'year-asc' | 'year-desc' | null>(null);
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -44,12 +46,7 @@ const BooksPage: React.FC = () => {
   };
 
   const handleCreate = async () => {
-    console.log("📤 Données envoyées :", JSON.stringify(formData, null, 2));
-
-    if (!formData.authorId) {
-      console.error("ERREUR: authorId est NULL ou vide !");
-      return;
-    }
+    if (!formData.authorId) return;
 
     try {
       const response = await fetch('http://localhost:3001/books', {
@@ -59,7 +56,7 @@ const BooksPage: React.FC = () => {
       });
 
       if (!response.ok) throw new Error('Erreur lors de la création');
-      await fetchBooks(); // recharge la vraie liste avec les auteurs peuplés
+      await fetchBooks();
       setIsCreateModalOpen(false);
       setFormData({ title: '', year: 0, authorId: '' });
     } catch (error) {
@@ -69,11 +66,10 @@ const BooksPage: React.FC = () => {
 
   const openEditModal = (book: Book) => {
     setSelectedBook(book);
-    
     setFormData({
       title: book.title,
       year: book.year,
-      authorId: (book.authorId || book.author?.id || '').toString(), // conversion en string AU CAS OU
+      authorId: (book.authorId || book.author?.id || '').toString(),
     });
     setIsEditModalOpen(true);
   };
@@ -116,9 +112,26 @@ const BooksPage: React.FC = () => {
     }
   };
 
+  // Recherche locale
   const filteredBooks = books.filter(book =>
     book.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Tri
+  const sortedBooks = [...filteredBooks].sort((a, b) => {
+    switch (sortOption) {
+      case 'title-asc':
+        return a.title.localeCompare(b.title);
+      case 'title-desc':
+        return b.title.localeCompare(a.title);
+      case 'year-asc':
+        return a.year - b.year;
+      case 'year-desc':
+        return b.year - a.year;
+      default:
+        return 0;
+    }
+  });
 
   return (
     <div className="p-4">
@@ -127,11 +140,39 @@ const BooksPage: React.FC = () => {
       {/* Barre de recherche */}
       <input
         type="text"
-        placeholder="Rechercher un livre par son nom..."
+        placeholder="Rechercher un livre..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         className="mb-4 px-4 py-2 border border-gray-300 rounded w-full"
       />
+
+      {/* Boutons de tri */}
+      <div className="flex gap-2 mb-4 flex-wrap">
+        <button
+          onClick={() => setSortOption('title-asc')}
+          className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Trier A → Z
+        </button>
+        <button
+          onClick={() => setSortOption('title-desc')}
+          className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Trier Z → A
+        </button>
+        <button
+          onClick={() => setSortOption('year-asc')}
+          className="px-3 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+        >
+          Année ↑
+        </button>
+        <button
+          onClick={() => setSortOption('year-desc')}
+          className="px-3 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+        >
+          Année ↓
+        </button>
+      </div>
 
       <button
         onClick={() => setIsCreateModalOpen(true)}
@@ -140,9 +181,8 @@ const BooksPage: React.FC = () => {
         Ajouter un livre
       </button>
 
-      {/* Modal pour créer/modifier un livre */}
       <BookList
-        books={filteredBooks}
+        books={sortedBooks}
         onEdit={openEditModal}
         onDelete={(book) => {
           setSelectedBook(book);
@@ -150,7 +190,7 @@ const BooksPage: React.FC = () => {
         }}
       />
 
-      {/* Modals */}
+      {/* Modal de création / modification */}
       <Modal
         isOpen={isCreateModalOpen || isEditModalOpen}
         onClose={() => {
@@ -190,7 +230,7 @@ const BooksPage: React.FC = () => {
         </div>
       </Modal>
 
-      {/* Modal pour supprimer un livre */}
+      {/* Modal de suppression */}
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
