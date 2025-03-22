@@ -1,4 +1,5 @@
 import { Book } from "../models/Book";
+import Link from "next/link";
 
 interface BookListProps {
   books: Book[];
@@ -13,11 +14,13 @@ const BookList: React.FC<BookListProps> = ({ books, onEdit, onDelete }) => {
         <li key={book.id} className="p-4 border rounded shadow">
           <h2 className="text-lg font-bold">{book.title}</h2>
           <p>Année : {book.year}</p>
-          <p>
-          Auteur : {book.author
-            ? `${book.author.firstName} ${book.author.lastName}`
-            : 'Inconnu'}
-          </p>
+          Auteur : {book.author && (
+            <Link href={`/authors/${book.author.id}`}>
+              <span className="text-blue-500 hover:underline">
+                {book.author.firstName} {book.author.lastName}
+              </span>
+            </Link>
+          )}
           <div className="mt-2 space-x-2">
             {onEdit && (
               <button

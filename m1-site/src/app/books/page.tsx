@@ -58,8 +58,7 @@ const BooksPage: React.FC = () => {
       });
 
       if (!response.ok) throw new Error('Erreur lors de la création');
-      const newBook: Book = await response.json();
-      setBooks([...books, newBook]);
+      await fetchBooks(); // recharge la vraie liste avec les auteurs peuplés
       setIsCreateModalOpen(false);
       setFormData({ title: '', year: 0, authorId: '' });
     } catch (error) {

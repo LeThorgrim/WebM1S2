@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { AuthorList } from '../../components/AuthorList';
 import { Modal } from '../../components/Modal';
-import { Author } from '../../models/Author';
+import { AuthorEntity as Author } from '../../models/Author';
 
 const AuthorsPage: React.FC = () => {
   const [authors, setAuthors] = useState<Author[]>([]);
