@@ -9,6 +9,7 @@ import { AuthorEntity } from '../../models/Author';
 const BooksPage: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [authors, setAuthors] = useState<AuthorEntity[]>([]);
+  const [searchTerm, setSearchTerm] = useState(''); // searchbar
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -74,15 +75,11 @@ const BooksPage: React.FC = () => {
       year: book.year,
       authorId: (book.authorId || book.author?.id || '').toString(), // conversion en string AU CAS OU
     });
-
-    console.log("Formulaire pré-rempli :", formData);
     setIsEditModalOpen(true);
   };
 
   const handleEdit = async () => {
     if (!selectedBook) return;
-
-    console.log("Données envoyées pour édition :", JSON.stringify(formData, null, 2));
 
     try {
       const response = await fetch(`http://localhost:3001/books/${selectedBook.id}`, {
@@ -119,21 +116,47 @@ const BooksPage: React.FC = () => {
     }
   };
 
+  const filteredBooks = books.filter(book =>
+    book.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Liste des livres</h1>
+
+      {/* Barre de recherche */}
+      <input
+        type="text"
+        placeholder="Rechercher un livre..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="mb-4 px-4 py-2 border border-gray-300 rounded w-full"
+      />
+
       <button
         onClick={() => setIsCreateModalOpen(true)}
         className="mb-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
       >
         Ajouter un livre
       </button>
-      <BookList books={books} onEdit={openEditModal} onDelete={(book) => { setSelectedBook(book); setIsDeleteModalOpen(true); }} />
 
       {/* Modal pour créer/modifier un livre */}
+      <BookList
+        books={filteredBooks}
+        onEdit={openEditModal}
+        onDelete={(book) => {
+          setSelectedBook(book);
+          setIsDeleteModalOpen(true);
+        }}
+      />
+
+      {/* Modals */}
       <Modal
         isOpen={isCreateModalOpen || isEditModalOpen}
-        onClose={() => { setIsCreateModalOpen(false); setIsEditModalOpen(false); }}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setIsEditModalOpen(false);
+        }}
         onConfirm={isCreateModalOpen ? handleCreate : handleEdit}
         title={isCreateModalOpen ? "Ajouter un livre" : "Modifier le livre"}
       >
