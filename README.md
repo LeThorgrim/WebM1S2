@@ -1,4 +1,5 @@
 # WebM1S2 Project
+📖 This README is also available in [🇫🇷 French](./README.fr.md)
 
 This is a full-stack project built with **React + Tailwind** for the frontend and **NestJS** for the backend. The entirety of **the website is in french**.
 

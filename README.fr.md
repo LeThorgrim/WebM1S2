@@ -1,4 +1,5 @@
 # Projet WebM1S2
+📖 Ce README est aussi disponible en [🇬🇧 English](./README.md)
 
 Ce projet full-stack est construit avec **React + Tailwind** pour le frontend et **NestJS** pour le backend.
 
