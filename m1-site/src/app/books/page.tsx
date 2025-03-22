@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import BookList from '../../components/BookList';
 import { Modal } from '../../components/Modal';
 import { Book } from '../../models/Book';
-import { AuthorEntity } from '../../models/Author'; // Corrigé pour utiliser `AuthorEntity`
+import { AuthorEntity } from '../../models/Author';
 
 const BooksPage: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -43,20 +43,20 @@ const BooksPage: React.FC = () => {
   };
 
   const handleCreate = async () => {
-    console.log("Données envoyées par le frontend :", JSON.stringify(formData, null, 2)); // DEBUG 
-  
-    if (!formData.authorId || typeof formData.authorId !== 'string') {
-      console.error("ERREUR: authorId est NULL ou mal formaté !");
+    console.log("📤 Données envoyées :", JSON.stringify(formData, null, 2));
+
+    if (!formData.authorId) {
+      console.error("ERREUR: authorId est NULL ou vide !");
       return;
     }
-  
+
     try {
       const response = await fetch('http://localhost:3001/books', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),  // Ne pas convertir en number, c'est un UUID
+        body: JSON.stringify(formData),
       });
-  
+
       if (!response.ok) throw new Error('Erreur lors de la création');
       const newBook: Book = await response.json();
       setBooks([...books, newBook]);
@@ -66,17 +66,32 @@ const BooksPage: React.FC = () => {
       console.error(error);
     }
   };
-  
-  
+
+  const openEditModal = (book: Book) => {
+    setSelectedBook(book);
+    
+    setFormData({
+      title: book.title,
+      year: book.year,
+      authorId: (book.authorId || book.author?.id || '').toString(), // conversion en string AU CAS OU
+    });
+
+    console.log("Formulaire pré-rempli :", formData);
+    setIsEditModalOpen(true);
+  };
 
   const handleEdit = async () => {
     if (!selectedBook) return;
+
+    console.log("Données envoyées pour édition :", JSON.stringify(formData, null, 2));
+
     try {
       const response = await fetch(`http://localhost:3001/books/${selectedBook.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, authorId: Number(formData.authorId) }), // Convertit `authorId` en `number`
+        body: JSON.stringify(formData),
       });
+
       if (!response.ok) throw new Error('Erreur lors de la modification');
       const updatedBook: Book = await response.json();
       setBooks(books.map((book) => (book.id === updatedBook.id ? updatedBook : book)));
@@ -90,10 +105,12 @@ const BooksPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!selectedBook) return;
+
     try {
       const response = await fetch(`http://localhost:3001/books/${selectedBook.id}`, {
         method: 'DELETE',
       });
+
       if (!response.ok) throw new Error('Erreur lors de la suppression');
       setBooks(books.filter((book) => book.id !== selectedBook.id));
       setIsDeleteModalOpen(false);
@@ -112,7 +129,7 @@ const BooksPage: React.FC = () => {
       >
         Ajouter un livre
       </button>
-      <BookList books={books} onEdit={(book) => { setSelectedBook(book); setIsEditModalOpen(true); }} onDelete={(book) => { setSelectedBook(book); setIsDeleteModalOpen(true); }} />
+      <BookList books={books} onEdit={openEditModal} onDelete={(book) => { setSelectedBook(book); setIsDeleteModalOpen(true); }} />
 
       {/* Modal pour créer/modifier un livre */}
       <Modal
@@ -136,18 +153,14 @@ const BooksPage: React.FC = () => {
             className="w-full p-2 border rounded"
             placeholder="Année"
           />
-          {/* ✅ Correction du dropdown */}
           <select
-            value={formData.authorId || ""}
-            onChange={(e) => {
-              setFormData({ ...formData, authorId: e.target.value });
-              console.log("Auteur sélectionné :", e.target.value); // DEBUG 🔥
-            }}
+            value={formData.authorId}
+            onChange={(e) => setFormData({ ...formData, authorId: e.target.value })}
             className="w-full p-2 border rounded"
           >
             <option value="">Sélectionner un auteur</option>
             {authors.map((author) => (
-              <option key={author.id} value={author.id.toString()}>
+              <option key={author.id} value={author.id}>
                 {author.firstName} {author.lastName}
               </option>
             ))}
