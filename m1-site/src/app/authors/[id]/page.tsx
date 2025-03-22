@@ -126,9 +126,6 @@ const AuthorDetailPage = () => {
       ) : (
         <p>Aucun livre trouvé pour cet auteur.</p>
       )}
-      <Link href="/authors" className="mt-4 inline-block text-blue-500 hover:underline">
-        Retour à la liste des auteurs
-      </Link>
 
       {/* Modal pour ajouter un livre */}
       <Modal
