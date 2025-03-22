@@ -17,7 +17,7 @@ export const Navigation: React.FC = () => {
       <div className="max-w-6xl mx-auto flex justify-between items-center">
       <div className="flex items-center space-x-2 text-white text-xl font-bold">
         <img src="/favicon.ico" alt="Logo" className="w-6 h-6" />
-        <span>La Librairie de Marco et Augustin</span>
+        <span>la Librairie d'Augustin et Marco</span>
       </div>
         <ul className="flex space-x-4">
           <li>
