@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { AuthorList } from '../../components/AuthorList';
 import { Modal } from '../../components/Modal';
 import { AuthorEntity as Author } from '../../models/Author';
+import { Book } from '../../models/Book';
 
 const AuthorsPage: React.FC = () => {
   const [authors, setAuthors] = useState<Author[]>([]);
@@ -70,21 +71,41 @@ const AuthorsPage: React.FC = () => {
     }
   };
 
-  // Supprimer un auteur
+  // Supprimer un auteur //update pour prendre en compte les foreign keys de books/authors
   const handleDelete = async () => {
     if (!selectedAuthor) return;
+  
     try {
-      const response = await fetch(`http://localhost:3001/authors/${selectedAuthor.id}`, {
+      // récupère tous les livres (non filtrés) //pas du tout optimisé mais c'est un peu un patch du dernier moment
+      const response = await fetch('http://localhost:3001/books');
+      if (!response.ok) throw new Error("Erreur lors de la récupération des livres");
+  
+      const books = await response.json();
+  
+      // filtre ceux de l’auteur select 
+      const relatedBooks = books.filter((book: Book) => {
+        return book.authorId === selectedAuthor.id || book.author?.id === selectedAuthor.id;
+      });
+  
+      if (relatedBooks.length > 0) {
+        alert("❌ Impossible de supprimer cet auteur : il a encore des livres associés.");
+        return;
+      }
+  
+      // aucune contrainte bdd => suppression autorisée
+      const deleteResponse = await fetch(`http://localhost:3001/authors/${selectedAuthor.id}`, {
         method: 'DELETE',
       });
-      if (!response.ok) throw new Error('Erreur lors de la suppression');
+  
+      if (!deleteResponse.ok) throw new Error('Erreur lors de la suppression');
+  
       setAuthors(authors.filter((author) => author.id !== selectedAuthor.id));
       setIsDeleteModalOpen(false);
       setSelectedAuthor(null);
     } catch (error) {
       console.error(error);
     }
-  };
+  };  
 
   const openCreateModal = () => {
     setFormData({ firstName: '', lastName: '' });
